@@ -15,7 +15,7 @@ class DecimalEncoder(json.JSONEncoder):
 
 def lambda_handler(event, context):
     dynamodb = boto3.client('dynamodb')
-    table = 'ledger'
+    table = 'club'
     item = {} # will be used to track what we put in DynamoDB
     
     if (event["queryStringParameters"] is not None): # verify we got query strings
@@ -30,6 +30,15 @@ def lambda_handler(event, context):
     
         if 'owner' in qsParams:
             item['owner'] = {'S': qsParams['owner']}
+        else: # kill the whole thing if we don't get a club name
+            print('No Owner Passed')
+            print(qsParams)
+
+        if 'since' in qsParams:
+            item['sinceDate'] = {'S': qsParams['since']}
+
+        if 'logoPath' in qsParams:
+            item['logo'] = {'S': qsParams['logoPath']}
 
         print('Adding: ' + inClubName)
 
