@@ -47,7 +47,7 @@ def lambda_handler(event, context):
                 print('Email Already Exists')
 
                 return {
-                    "statusCode": 503
+                    "statusCode": 417
                 }
         else:
             print("Player Created")
