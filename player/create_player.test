@@ -1,0 +1,8 @@
+{
+  "httpMethod": "POST",
+  "queryStringParameters": {
+    "email": "Test@Test.com",
+    "fullName": "Test User",
+    "nickName": "Testy McTester"
+  }
+}
