@@ -1,0 +1,47 @@
+<html>
+    <head>
+        
+    </head>
+    <body>
+        <h1>All Players</h1>
+        <div id="players">
+
+        </div>
+
+        <h1>New Players</h1>
+        <form>
+            <label for="email">Email</label>
+            <input type="text" id="email" />
+
+            <button id="submitButton">Submit</button>
+        </form>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+               
+            });
+
+            $('#submitButton').on('click', function() {
+                $.ajax({
+                    type: "POST",
+                    url: "https://02n55m01gk.execute-api.us-east-1.amazonaws.com/qa/player",
+                    dataType: "text json",
+                    data: JSON.stringify({"email":"kenny@kenny.net", "fullName": "That Guy"}),
+                    contentType: "application/json",
+                    async: false,
+                    
+                    success: function(result,status,xhr) {
+                        alert("Success")
+                    },
+
+                    error: function(xhr,status,error) {
+                        alert("Failed")
+                    }
+                });
+
+                return false
+            });
+        </script>
+    </body>
+</html>

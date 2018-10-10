@@ -17,42 +17,53 @@ def lambda_handler(event, context):
     dynamodb = boto3.client('dynamodb')
     table = 'player'
     item = {} # will be used to track what we put in DynamoDB
+    payLoad = event['body'] # API Gateway passes unencoded json (read: string) in body
+    payLoad = json.loads(payLoad) # Encode string into json (read: dict)
 
-    if (event["queryStringParameters"] is not None): # verify we got query strings
-        qsParams = event["queryStringParameters"]
+    if 'email' in payLoad:
+        inEmail = payLoad['email']
+        item['email'] = {'S': payLoad['email']}
+    else: # kill the whole thing if we don't get a club name
+        print('No Email Passed')
+        print(payLoad)
 
-        if 'email' in qsParams:
-            inEmail =  qsParams['email']
-            item['email'] = {'S': qsParams['email']}
-        else: # kill the whole thing if we don't get a club name
-            print('No Email Passed')
-            print(qsParams)
-    
-        if 'fullName' in qsParams:
-            item['fullName'] = {'S': qsParams['fullName']}
+    if 'fullName' in payLoad:
+        item['fullName'] = {'S': payLoad['fullName']}
 
-        if 'nickName' in qsParams:
-            item['nickName'] = {'S': qsParams['nickName']}
+    if 'nickName' in payLoad:
+        item['nickName'] = {'S': payLoad['nickName']}
 
-        print('Adding: ' + inEmail)
+    print('Trying to add: ' + inEmail)
 
-        try:
-            response = dynamodb.put_item(
-                TableName=table, 
-                Item=item,
-                ConditionExpression="attribute_not_exists(email)"
-            )
-        except Exception as e:
-            if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
-                print('Email Already Exists')
+    try:
+        response = dynamodb.put_item(
+            TableName=table, 
+            Item=item,
+            ConditionExpression="attribute_not_exists(email)"
+        )
+    except Exception as e:
+        if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
+            print(inEmail + ' already exists in table ' + table)
 
-                return {
-                    "statusCode": 417
-                }
-        else:
-            print("Player Created")
-        
-            # This allows the API to not return 502 Bad Gateway
             return {
-                "statusCode": 200
+                "isBase64Encoded": False,
+                "statusCode": 200,
+                "headers": {},
+                'body': json.dumps({
+                    'resultText': 'Email already exists',
+                    'result': False
+                })
             }
+    else:
+        print("Player Created")
+    
+        # This allows the API to not return 502 Bad Gateway
+        return {
+            "isBase64Encoded": False,
+            "statusCode": 200,
+            "headers": {},
+            'body': json.dumps({
+                'resultText': 'Player Added!',
+                'result': True
+            })
+        }
