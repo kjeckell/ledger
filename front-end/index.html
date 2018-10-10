@@ -33,11 +33,13 @@
                     async: false,
                     
                     success: function(result,status,xhr) {
-                        alert('Success')
+                        for (i = 0; i < result.players.length; i++) { 
+                            $('#players').append('<p>' + result.players[i].fullName.S + '</p>')
+                        }
                     },
 
                     error: function(xhr,status,error) {
-                        alert("Fail")
+                        alert("Fail");
                     }
                 });
             });
@@ -57,6 +59,7 @@
                     
                     success: function(result,status,xhr) {
                         alert(result.resultText)
+                        location.reload();
                     },
 
                     error: function(xhr,status,error) {
