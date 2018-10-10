@@ -48,7 +48,9 @@ def lambda_handler(event, context):
             return {
                 "isBase64Encoded": False,
                 "statusCode": 200,
-                "headers": {},
+                "headers": {
+                    "Access-Control-Allow-Origin": '*'
+                },
                 'body': json.dumps({
                     'resultText': 'Email already exists',
                     'result': False
@@ -61,7 +63,9 @@ def lambda_handler(event, context):
         return {
             "isBase64Encoded": False,
             "statusCode": 200,
-            "headers": {},
+            "headers": {
+                "Access-Control-Allow-Origin": '*'
+            },
             'body': json.dumps({
                 'resultText': 'Player Added!',
                 'result': True
