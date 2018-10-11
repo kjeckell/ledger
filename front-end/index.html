@@ -4,9 +4,13 @@
     </head>
     <body>
         <h1>All Players</h1>
-        <div id="players">
-
-        </div>
+        <table id="players" border=1>
+            <thead>
+                <th>email</th>
+                <th>full name</th>
+                <th>nickname</th>
+            </thead>
+        </table>
 
         <h1>New Players</h1>
         <form>
@@ -27,14 +31,28 @@
             $(document).ready(function() {
                 $.ajax({
                     type: "GET",
-                    url: "https://02n55m01gk.execute-api.us-east-1.amazonaws.com/qa/player",
+                    url: "https://m6ch741fz1.execute-api.us-east-1.amazonaws.com/dev/players",
                     dataType: "text json",
                     contentType: "application/json",
                     async: false,
                     
                     success: function(result,status,xhr) {
                         for (i = 0; i < result.players.length; i++) { 
-                            $('#players').append('<p>' + result.players[i].fullName.S + '</p>')
+                            tblDet = "<tr><td>" + result.players[i].email.S + "</td>"
+
+                            if (result.players[i].fullName != undefined) {
+                                tblDet = tblDet + "<td>" +  result.players[i].fullName.S + "</td>"
+                            } else {
+                                tblDet = tblDet + "<td></td>"
+                            }
+
+                            if (result.players[i].nickName != undefined) {
+                                tblDet = tblDet + "<td>" +  result.players[i].nickName.S + "</td>"
+                            } else {
+                                tblDet = tblDet + "<td></td>"
+                            }
+
+                            $('#players').append(tblDet)
                         }
                     },
 
@@ -47,7 +65,7 @@
             $('#submitButton').on('click', function() {
                 $.ajax({
                     type: "POST",
-                    url: "https://02n55m01gk.execute-api.us-east-1.amazonaws.com/qa/player",
+                    url: "https://m6ch741fz1.execute-api.us-east-1.amazonaws.com/dev/player",
                     dataType: "text json",
                     data: JSON.stringify({
                         "email": document.getElementById('email').value, 
@@ -58,7 +76,7 @@
                     async: false,
                     
                     success: function(result,status,xhr) {
-                        alert(result.resultText)
+                        alert(result.message)
                         location.reload();
                     },
 
