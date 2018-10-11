@@ -13,7 +13,7 @@ class DecimalEncoder(json.JSONEncoder):
                 return int(o)
         return super(DecimalEncoder, self).default(o)
 
-def lambda_handler(event, context):
+def get_players(event, context):
     dynamodb = boto3.client('dynamodb')
     table = 'player'
     
@@ -36,7 +36,7 @@ def lambda_handler(event, context):
                 "Access-Control-Allow-Origin": '*'
             },
             'body': json.dumps({
-                'players': ''players'',
+                'players': {},
                 'success': False
             })
         }
