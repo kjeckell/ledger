@@ -45,7 +45,7 @@ provider:
 # to use them we must import os and call with os.environ['VARNAME']
   environment:
     PlayerTableName: ${self:custom.PlayerTableName} # pulling from custom section
-    ClubTableName: ${self:custom.PlayerTableName}
+    ClubTableName: ${self:custom.ClubTableName}
 
 # you can add packaging information here
 # treating this as gitignore for package
