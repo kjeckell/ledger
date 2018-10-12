@@ -3,56 +3,38 @@ import boto3
 import json
 import decimal
 
-# Helper class to convert a DynamoDB item to JSON.
-class DecimalEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, decimal.Decimal):
-            if abs(o) % 1 > 0:
-                return float(o)
-            else:
-                return int(o)
-        return super(DecimalEncoder, self).default(o)
+# Default container for returns to API Gateway
+# you will need to add a 'body' key with a JSON
+# string containing the intended response
+retVal = {"isBase64Encoded": False, "statusCode": 200,"headers": {"Access-Control-Allow-Origin": '*', "Access-Control-Allow-Credentials": True}}
 
 def get_players(event, context):
+    '''get_players is a Lambda Function used to return all players
+
+        Inputs: 
+        Outputs:
+            JSON formated string containing
+            - message: function outcome
+            - success: True/False if the insert succeeded
+            - players: all players in a single dict
+    '''
     dynamodb = boto3.client('dynamodb')
     table = 'player'
     
-    #fe = Key('col').between(val, val)
-    #pe = "#projCol, Col, Col.Key"
-    # Expression Attribute Names for Projection Expression only.
-    #ean = { "#projCol": "Col", }
-    
     try:
+        print('Attempting to scan ' + table)
         response = dynamodb.scan(
             TableName = table
         )
     except Exception as e:
-        print(e.response['Error']['Message'])
-
-        return {
-            "isBase64Encoded": False,
-            "statusCode": 200,
-            "headers": {
-                "Access-Control-Allow-Origin": '*'
-            },
-            'body': json.dumps({
-                'players': {},
-                'success': False
-            })
-        }
+        print('Scan failed')
+        print(e)
+        
+        retVal['body'] = json.dumps({'message': 'Unable to search table', 'success': False, 'players': {}})
+        return retVal
     else:
         print("Players Returned")
         players = response['Items']
 
-        # This allows the API to not return 502 Bad Gateway
-        return {
-            "isBase64Encoded": False,
-            "statusCode": 200,
-            "headers": {
-                "Access-Control-Allow-Origin": '*'
-            },
-            'body': json.dumps({
-                'players': players,
-                'success': True
-            })
-        }
+        retVal['body'] = json.dumps({'message': 'Unable to search table', 'success': False, 'players': players})
+        return retVal
