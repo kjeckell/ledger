@@ -1,0 +1,30 @@
+Resources:
+  PlayerTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:custom.PlayerTableName}
+      AttributeDefinitions:
+        - AttributeName: email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: email
+          KeyType: HASH
+      # Set the capacity based on the stage
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:custom.tableThroughput}
+        WriteCapacityUnits: ${self:custom.tableThroughput}
+
+  ClubTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:custom.ClubTableName}
+      AttributeDefinitions:
+        - AttributeName: clubName
+          AttributeType: S
+      KeySchema:
+        - AttributeName: clubName
+          KeyType: HASH
+      # Set the capacity based on the stage
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:custom.tableThroughput}
+        WriteCapacityUnits: ${self:custom.tableThroughput}

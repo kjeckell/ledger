@@ -31,7 +31,7 @@
             $(document).ready(function() {
                 $.ajax({
                     type: "GET",
-                    url: "https://m6ch741fz1.execute-api.us-east-1.amazonaws.com/dev/players",
+                    url: "https://jy49q24dg2.execute-api.us-east-1.amazonaws.com/dev/players",
                     dataType: "text json",
                     contentType: "application/json",
                     async: false,
@@ -65,7 +65,7 @@
             $('#submitButton').on('click', function() {
                 $.ajax({
                     type: "POST",
-                    url: "https://m6ch741fz1.execute-api.us-east-1.amazonaws.com/dev/player",
+                    url: "https://jy49q24dg2.execute-api.us-east-1.amazonaws.com/dev/player",
                     dataType: "text json",
                     data: JSON.stringify({
                         "email": document.getElementById('email').value, 

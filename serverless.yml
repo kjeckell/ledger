@@ -1,22 +1,26 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
-# For full config options, check the docs:
-#    docs.serverless.com
-#
-# Happy Coding!
-
 service: ledger-app # NOTE: update this with your service name
 
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
-# frameworkVersion: "=X.X.X"
+# Custom Settings
+custom:
+  # Our stage is based on what is passed in when running serverless
+  # commands. Or fallsback to what we have set in the provider section.
+  stage: ${opt:stage, self:provider.stage}
 
+  # Setup our DyanamoDB tables based on our stage passed in
+  PlayerTableName: ${self:custom.stage}-player
+  ClubTableName: ${self:custom.stage}-club
+
+  # Set our DynamoDB throughput for prod and all other non-prod stages.
+  tableThroughputs:
+    prod: 5
+    default: 1
+  tableThroughput: ${self:custom.tableThroughputs.${self:custom.stage}, self:custom.tableThroughputs.default}
+
+resources:
+  # Create DynamoDB Tables In External File
+  - ${file(resources/dynamodb-tables.yml)}
+
+# AWS Information
 provider:
   name: aws
   runtime: python3.6
@@ -34,18 +38,20 @@ provider:
         - "dynamodb:Query"
         - "dynamodb:GetItem"
       Resource:
-        - "arn:aws:dynamodb:${self:provider.region}:*:table/player"
-        - "arn:aws:dynamodb:${self:provider.region}:*:table/club"
+        - "Fn::GetAtt": [ PlayerTable, Arn ] # pulled from dynamodb include file
+        - "Fn::GetAtt": [ ClubTable, Arn ] # pulled from dynamodb include file
 
 # you can define service wide environment variables here
-#  environment:
-#    variable1: value1
+# to use them we must import os and call with os.environ['VARNAME']
+  environment:
+    PlayerTableName: ${self:custom.PlayerTableName} # pulling from custom section
+    ClubTableName: ${self:custom.PlayerTableName}
 
 # you can add packaging information here
+# treating this as gitignore for package
 package:
 #  include:
 #    - include-me.py
-#    - include-me-dir/**
   exclude:
     - README.md
     - .gitignore
@@ -85,48 +91,3 @@ functions:
           path: players
           method: get
           cors: true
-
-#    The following are a few example events you can configure
-#    NOTE: Please make sure to change your handler code to work with those events
-#    Check the event documentation for details
-#    events:
-#      - http:
-#          path: users/create
-#          method: get
-#      - s3: ${env:BUCKET}
-#      - schedule: rate(10 minutes)
-#      - sns: greeter-topic
-#      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
-#      - alexaSkill: amzn1.ask.skill.xx-xx-xx-xx
-#      - alexaSmartHome: amzn1.ask.skill.xx-xx-xx-xx
-#      - iot:
-#          sql: "SELECT * FROM 'some_topic'"
-#      - cloudwatchEvent:
-#          event:
-#            source:
-#              - "aws.ec2"
-#            detail-type:
-#              - "EC2 Instance State-change Notification"
-#            detail:
-#              state:
-#                - pending
-#      - cloudwatchLog: '/aws/lambda/hello'
-#      - cognitoUserPool:
-#          pool: MyUserPool
-#          trigger: PreSignUp
-
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
-
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"

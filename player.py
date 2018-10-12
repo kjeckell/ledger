@@ -2,11 +2,13 @@ from __future__ import print_function # Python 2/3 compatibility
 import boto3
 import json
 import decimal
+import os
 
 # Default container for returns to API Gateway
 # you will need to add a 'body' key with a JSON
 # string containing the intended response
 retVal = {"isBase64Encoded": False, "statusCode": 200,"headers": {"Access-Control-Allow-Origin": '*', "Access-Control-Allow-Credentials": True}}
+table = os.environ['PlayerTableName']
 
 def add_player(event, context):
     '''add_player is a Lambda Function used to insert a player record
@@ -23,7 +25,6 @@ def add_player(event, context):
             - player: submitted player object
     '''
     dynamodb = boto3.client('dynamodb')
-    table = 'player'
     player = {} # will be used to track what we put in DynamoDB
 
     # Pull the passed data into python objects
@@ -80,7 +81,6 @@ def get_player(event, context):
             - player: player object
     '''
     dynamodb = boto3.client('dynamodb')
-    table = 'player'
 
     # Need to validate that we actually recieved query string parameters
     if (event["queryStringParameters"] is not None):
@@ -126,7 +126,6 @@ def update_player(event, context):
             - player: player object
     '''
     dynamodb = boto3.client('dynamodb')
-    table = 'player'
 
     # Pull the passed data into python objects
     payLoad = event['body'] # API Gateway passes unencoded json (read: string) in body
