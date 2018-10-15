@@ -91,3 +91,27 @@ functions:
           path: players
           method: get
           cors: true
+
+  add-club:
+    handler: club.add_club
+    events:
+      - http:
+          path: club
+          method: post
+          cors: true
+
+  get-club:
+    handler: club.get_club
+    events:
+      - http:
+          path: club
+          method: get
+          cors: true
+  
+  update-club:
+    handler: club.update_club
+    events:
+      - http:
+          path: club
+          method: put
+          cors: true
