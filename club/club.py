@@ -102,7 +102,7 @@ def get_club(event, context):
             except Exception as e:
                 print(e)
 
-                retVal['body'] = json.dumps({'message': 'No Club Found', 'success': False, 'player': {}})
+                retVal['body'] = json.dumps({'message': 'No Club Found', 'success': False, 'club': {}})
                 return retVal
             else:
                 print(inEmail + " Returned")
