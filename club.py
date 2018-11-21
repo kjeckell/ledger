@@ -1,4 +1,4 @@
-from __future__ import print_function # Python 2/3 compatibility
+from __future__ import print_function  # Python 2/3 compatibility
 import boto3
 import json
 import decimal
@@ -7,8 +7,10 @@ import os
 # Default container for returns to API Gateway
 # you will need to add a 'body' key with a JSON
 # string containing the intended response
-retVal = {"isBase64Encoded": False, "statusCode": 200,"headers": {"Access-Control-Allow-Origin": '*', "Access-Control-Allow-Credentials": True}}
+retVal = {"isBase64Encoded": False, "statusCode": 200, "headers": {
+    "Access-Control-Allow-Origin": '*', "Access-Control-Allow-Credentials": True}}
 table = os.environ['ClubTableName']
+
 
 def add_club(event, context):
     '''add_club is a Lambda Function used to insert a club record
@@ -25,17 +27,18 @@ def add_club(event, context):
             - club: submitted club object
     '''
     dynamodb = boto3.client('dynamodb')
-    club = {} # will be used to track what we put in DynamoDB
+    club = {}  # will be used to track what we put in DynamoDB
 
     # Pull the passed data into python objects
-    payLoad = event['body'] # API Gateway passes unencoded json (read: string) in body
-    payLoad = json.loads(payLoad) # Encode string into json (read: dict)
+    # API Gateway passes unencoded json (read: string) in body
+    payLoad = event['body']
+    payLoad = json.loads(payLoad)  # Encode string into json (read: dict)
 
     # Data validation and testing if data exists
     if 'email' in payLoad:
         inEmail = payLoad['email']
         club['email'] = {'S': payLoad['email']}
-    else: # kill the whole thing if we don't get a club email
+    else:  # kill the whole thing if we don't get a club email
         print('No Email Passed')
         print(payLoad)
 
@@ -49,7 +52,7 @@ def add_club(event, context):
     try:
         print('Trying to add: ' + inEmail)
         response = dynamodb.put_item(
-            TableName=table, 
+            TableName=table,
             Item=club,
             ConditionExpression="attribute_not_exists(email)"
         )
@@ -57,7 +60,8 @@ def add_club(event, context):
         if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
             print(inEmail + ' already exists in table ' + table)
             # Adding the 'body' key and contents for delivery back to requestor
-            retVal['body'] = json.dumps({'message': 'Email already exists', 'success': False, 'club': {}})
+            retVal['body'] = json.dumps(
+                {'message': 'Email already exists', 'success': False, 'club': {}})
             return retVal
         else:
             print("Unhandled Error")
@@ -65,9 +69,11 @@ def add_club(event, context):
     else:
         print(inEmail + " Created")
         # Adding the 'body' key and contents for delivery back to requestor
-        retVal['body'] = json.dumps({'message': 'Club Added', 'success': True, 'club': club})
+        retVal['body'] = json.dumps(
+            {'message': 'Club Added', 'success': True, 'club': club})
         return retVal
-        
+
+
 def get_club(event, context):
     '''get_club is a Lambda Function used to return a single club record
 
@@ -85,7 +91,7 @@ def get_club(event, context):
     # Need to validate that we actually recieved query string parameters
     if (event["queryStringParameters"] is not None):
         qsParams = event["queryStringParameters"]
-        
+
         # Validate that we recieved a key 'email' in the query string
         if 'email' in qsParams:
             inEmail = qsParams['email']
@@ -94,23 +100,26 @@ def get_club(event, context):
             try:
                 print('Trying to find ' + inEmail)
                 response = dynamodb.get_item(
-                    TableName = table,
-                    Key = {
-                        'email' : {'S' : str(qsParams['email'])}
+                    TableName=table,
+                    Key={
+                        'email': {'S': str(qsParams['email'])}
                     }
                 )
             except Exception as e:
                 print(e)
 
-                retVal['body'] = json.dumps({'message': 'No Club Found', 'success': False, 'club': {}})
+                retVal['body'] = json.dumps(
+                    {'message': 'No Club Found', 'success': False, 'club': {}})
                 return retVal
             else:
                 print(inEmail + " Returned")
                 club = response['Item']
 
-                retVal['body'] = json.dumps({'message': 'Club Returned', 'success': True, 'club': club})
+                retVal['body'] = json.dumps(
+                    {'message': 'Club Returned', 'success': True, 'club': club})
                 return retVal
-    
+
+
 def update_club(event, context):
     '''update_club is a Lambda Function used to update any value for a single club record
 
@@ -128,8 +137,9 @@ def update_club(event, context):
     dynamodb = boto3.client('dynamodb')
 
     # Pull the passed data into python objects
-    payLoad = event['body'] # API Gateway passes unencoded json (read: string) in body
-    payLoad = json.loads(payLoad) # Encode string into json (read: dict)
+    # API Gateway passes unencoded json (read: string) in body
+    payLoad = event['body']
+    payLoad = json.loads(payLoad)  # Encode string into json (read: dict)
 
     # Need to valdiate that we got an email in the payload
     if 'email' in payLoad:
@@ -137,28 +147,30 @@ def update_club(event, context):
         try:
             print('Looking for ' + payLoad['email'])
             response = dynamodb.get_item(
-                TableName = table,
-                Key = {
-                    'email' : {'S' : str(payLoad['email'])}
+                TableName=table,
+                Key={
+                    'email': {'S': str(payLoad['email'])}
                 }
             )
         except Exception as e:
             # TODO: Build specific handling for club not found vs generic something went wrong
             print(payLoad['email'] + ' not found')
             print(e)
-            retVal['body'] = json.dumps({'message': 'Club Not Found', 'success': False, 'club': {}})
+            retVal['body'] = json.dumps(
+                {'message': 'Club Not Found', 'success': False, 'club': {}})
             return retVal
         else:
             print(payLoad['email'] + ' was found')
-            club = response['Item'] # taking the existing club object in from the initial search
+            # taking the existing club object in from the initial search
+            club = response['Item']
 
             # Validate what data we got in the payload to do updates with
             if 'clubName' in payLoad:
-                club['clubName'] = {'S': payLoad['clubName'] }
+                club['clubName'] = {'S': payLoad['clubName']}
 
             if 'nickName' in payLoad:
-                club['nickName'] = {'S': payLoad['nickName'] }
-                
+                club['nickName'] = {'S': payLoad['nickName']}
+
             # Need to try updating the club record we found
             try:
                 print('Trying to update ' + payLoad['email'])
@@ -166,13 +178,16 @@ def update_club(event, context):
             except Exception as e:
                 print(payLoad['email'] + ' failed to update')
                 print(e)
-                retVal['body'] = json.dumps({'message': 'Club Not Found', 'success': False, 'club': {}})
+                retVal['body'] = json.dumps(
+                    {'message': 'Club Not Found', 'success': False, 'club': {}})
                 return retVal
             else:
                 print(payLoad['email'] + " Updated")
-                retVal['body'] = json.dumps({'message': 'Club Updated', 'success': True, 'club': club})
+                retVal['body'] = json.dumps(
+                    {'message': 'Club Updated', 'success': True, 'club': club})
                 return retVal
     # We never got an email in the payload so we cant update anything
     else:
-        retVal['body'] = json.dumps({'message': 'No Email Recieved', 'success': False, 'club': {}})
+        retVal['body'] = json.dumps(
+            {'message': 'No Email Recieved', 'success': False, 'club': {}})
         return retVal
