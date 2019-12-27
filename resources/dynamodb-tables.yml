@@ -28,3 +28,18 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: ${self:custom.tableThroughput}
         WriteCapacityUnits: ${self:custom.tableThroughput}
+  
+  GamesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:custom.GamesTableName}
+      AttributeDefinitions:
+        - AttributeName: gameUniqueKey
+          AttributeType: S
+      KeySchema:
+        - AttributeName: gameUniqueKey
+          KeyType: HASH
+      # Set the capacity based on the stage
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:custom.tableThroughput}
+        WriteCapacityUnits: ${self:custom.tableThroughput}

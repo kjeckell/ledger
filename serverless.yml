@@ -9,6 +9,7 @@ custom:
   # Setup our DyanamoDB tables based on our stage passed in
   PlayerTableName: ${self:custom.stage}-player
   ClubTableName: ${self:custom.stage}-club
+  GamesTableName: ${self:custom.stage}-games
 
   # Set our DynamoDB throughput for prod and all other non-prod stages.
   tableThroughputs:
@@ -40,12 +41,14 @@ provider:
       Resource:
         - "Fn::GetAtt": [ PlayerTable, Arn ] # pulled from dynamodb include file
         - "Fn::GetAtt": [ ClubTable, Arn ] # pulled from dynamodb include file
+        - "Fn::GetAtt": [ GamesTable, Arn ]
 
 # you can define service wide environment variables here
 # to use them we must import os and call with os.environ['VARNAME']
   environment:
     PlayerTableName: ${self:custom.PlayerTableName} # pulling from custom section
     ClubTableName: ${self:custom.ClubTableName}
+    GamesTableName: ${self:custom.GamesTableName}
 
 # you can add packaging information here
 # treating this as gitignore for package
@@ -113,5 +116,21 @@ functions:
     events:
       - http:
           path: club
+          method: put
+          cors: true
+
+  get-clubs:
+    handler: clubs.get_clubs
+    events:
+      - http:
+          path: clubs
+          method: get
+          cors: true
+
+  start-game:
+    handler: game.start_game
+    events:
+      - http:
+          path: game
           method: put
           cors: true
