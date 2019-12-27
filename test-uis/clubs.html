@@ -1,0 +1,81 @@
+<html>
+    <head>
+        
+    </head>
+    <body>
+        <h1>All Clubs</h1>
+        <table id="clubs" border=1>
+            <thead>
+                <th>club name</th>
+                <th>nickname</th>
+            </thead>
+        </table>
+
+        <h1>New Club</h1>
+        <form>
+            <label for="clubName">Club Name</label>
+            <input type="text" id="clubName" />
+
+            <label for="nickName">Nickname</label>
+            <input type="text" id="nickName" />
+
+            <button id="submitButton">Submit</button>
+        </form>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $.ajax({
+                    type: "GET",
+                    url: "https://rd8on6lfc3.execute-api.us-east-1.amazonaws.com/dev/clubs",
+                    dataType: "text json",
+                    contentType: "application/json",
+                    async: false,
+                    
+                    success: function(result,status,xhr) {
+                        for (i = 0; i < result.clubs.length; i++) {
+                            tblDet = "<tr><td>" + result.clubs[i].clubName.S + "</td>"
+                            
+                            if (result.clubs[i].nickName != undefined) {
+                                tblDet = tblDet + "<td>" +  result.clubs[i].nickName.S + "</td>"
+                            } else {
+                                tblDet = tblDet + "<td></td>"
+                            }
+
+                            $('#clubs').append(tblDet)
+                        }
+                    },
+
+                    error: function(xhr,status,error) {
+                        alert("Fail");
+                    }
+                });
+            });
+
+            $('#submitButton').on('click', function() {
+                $.ajax({
+                    type: "POST",
+                    url: "https://rd8on6lfc3.execute-api.us-east-1.amazonaws.com/dev/club",
+                    dataType: "text json",
+                    data: JSON.stringify({
+                        "clubName": document.getElementById('clubName').value,
+                        "nickName": document.getElementById('nickName').value
+                    }),
+                    contentType: "application/json",
+                    async: false,
+                    
+                    success: function(result,status,xhr) {
+                        alert(result.message)
+                        location.reload();
+                    },
+
+                    error: function(xhr,status,error) {
+                        alert("Failed")
+                    }
+                });
+
+                return false
+            });
+        </script>
+    </body>
+</html>
