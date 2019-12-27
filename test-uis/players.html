@@ -1,6 +1,40 @@
 <html>
     <head>
-        
+        <script>
+          function getPlayers() {
+            $.ajax({
+                type: "GET",
+                url: "https://rd8on6lfc3.execute-api.us-east-1.amazonaws.com/dev/players",
+                dataType: "text json",
+                contentType: "application/json",
+                async: false,
+                
+                success: function(result,status,xhr) {
+                    for (i = 0; i < result.players.length; i++) { 
+                        tblDet = "<tr><td>" + result.players[i].email.S + "</td>"
+
+                        if (result.players[i].fullName != undefined) {
+                            tblDet = tblDet + "<td>" +  result.players[i].fullName.S + "</td>"
+                        } else {
+                            tblDet = tblDet + "<td></td>"
+                        }
+
+                        if (result.players[i].nickName != undefined) {
+                            tblDet = tblDet + "<td>" +  result.players[i].nickName.S + "</td>"
+                        } else {
+                            tblDet = tblDet + "<td></td>"
+                        }
+
+                        $('#players').append(tblDet)
+                    }
+                },
+
+                error: function(xhr,status,error) {
+                    alert("Fail");
+                }
+            });
+          }
+        </script>
     </head>
     <body>
         <h1>All Players</h1>
@@ -24,47 +58,44 @@
             <input type="text" id="nickName" />
 
             <button id="submitButton">Submit</button>
+            <button id="updateButton">Update</button>
         </form>
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
         <script type="text/javascript">
             $(document).ready(function() {
-                $.ajax({
-                    type: "GET",
-                    url: "https://rd8on6lfc3.execute-api.us-east-1.amazonaws.com/dev/players",
-                    dataType: "text json",
-                    contentType: "application/json",
-                    async: false,
-                    
-                    success: function(result,status,xhr) {
-                        for (i = 0; i < result.players.length; i++) { 
-                            tblDet = "<tr><td>" + result.players[i].email.S + "</td>"
-
-                            if (result.players[i].fullName != undefined) {
-                                tblDet = tblDet + "<td>" +  result.players[i].fullName.S + "</td>"
-                            } else {
-                                tblDet = tblDet + "<td></td>"
-                            }
-
-                            if (result.players[i].nickName != undefined) {
-                                tblDet = tblDet + "<td>" +  result.players[i].nickName.S + "</td>"
-                            } else {
-                                tblDet = tblDet + "<td></td>"
-                            }
-
-                            $('#players').append(tblDet)
-                        }
-                    },
-
-                    error: function(xhr,status,error) {
-                        alert("Fail");
-                    }
-                });
+                getPlayers();
             });
 
             $('#submitButton').on('click', function() {
                 $.ajax({
                     type: "POST",
+                    url: "https://rd8on6lfc3.execute-api.us-east-1.amazonaws.com/dev/player",
+                    dataType: "text json",
+                    data: JSON.stringify({
+                        "email": document.getElementById('email').value, 
+                        "fullName": document.getElementById('fullName').value,
+                        "nickName": document.getElementById('nickName').value
+                    }),
+                    contentType: "application/json",
+                    async: false,
+                    
+                    success: function(result,status,xhr) {
+                        alert(result.message)
+                        location.reload();
+                    },
+
+                    error: function(xhr,status,error) {
+                        alert("Failed")
+                    }
+                });
+
+                return false
+            });
+
+            $('#updateButton').on('click', function() {
+                $.ajax({
+                    type: "PUT",
                     url: "https://rd8on6lfc3.execute-api.us-east-1.amazonaws.com/dev/player",
                     dataType: "text json",
                     data: JSON.stringify({
