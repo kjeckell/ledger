@@ -35,11 +35,12 @@ def get_clubs(event, context):
 
         retVal['body'] = json.dumps(
             {'message': 'Unable to search table', 'success': False, 'clubs': {}})
+        retVal['statusCode'] = 500
         return retVal
     else:
         print("Clubs Returned")
         clubs = response['Items']
 
         retVal['body'] = json.dumps(
-            {'message': 'Unable to search table', 'success': False, 'clubs': clubs})
+            {'message': 'Clubs Returned Successfully', 'success': True, 'clubs': clubs})
         return retVal

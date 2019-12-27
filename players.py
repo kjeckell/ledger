@@ -35,11 +35,12 @@ def get_players(event, context):
 
         retVal['body'] = json.dumps(
             {'message': 'Unable to search table', 'success': False, 'players': {}})
+        retVal['statusCode'] = 500
         return retVal
     else:
         print("Players Returned")
         players = response['Items']
 
         retVal['body'] = json.dumps(
-            {'message': 'Unable to search table', 'success': False, 'players': players})
+            {'message': 'Players Returned', 'success': True, 'players': players})
         return retVal
