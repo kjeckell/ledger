@@ -1,7 +1,0 @@
-{
-  "httpMethod": "POST",
-  "queryStringParameters": {
-    "club": "TestRunClub",
-    "owner": "TestRunOwner"
-  }
-}
