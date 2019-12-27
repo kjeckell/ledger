@@ -17,8 +17,7 @@ def add_club(event, context):
 
         Inputs: 
             JSON formated Response Header (from API Gateway)
-            - email: string (REQUIRED)
-            - clubName: string
+            - clubName: string (REQUIRED)
             - nickName: string
         Outputs:
             JSON formated string containing
@@ -35,14 +34,8 @@ def add_club(event, context):
     payLoad = json.loads(payLoad)  # Encode string into json (read: dict)
 
     # Data validation and testing if data exists
-    if 'email' in payLoad:
-        inEmail = payLoad['email']
-        club['email'] = {'S': payLoad['email']}
-    else:  # kill the whole thing if we don't get a club email
-        print('No Email Passed')
-        print(payLoad)
-
     if 'clubName' in payLoad:
+        inClubName = payLoad['clubName']
         club['clubName'] = {'S': payLoad['clubName']}
 
     if 'nickName' in payLoad:
@@ -50,24 +43,24 @@ def add_club(event, context):
 
     # Attempt to add the club to dynamodb
     try:
-        print('Trying to add: ' + inEmail)
+        print('Trying to add: ' + inClubName)
         response = dynamodb.put_item(
             TableName=table,
             Item=club,
-            ConditionExpression="attribute_not_exists(email)"
+            ConditionExpression="attribute_not_exists(clubName)"
         )
     except Exception as e:
         if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
-            print(inEmail + ' already exists in table ' + table)
+            print(inClubName + ' already exists in table ' + table)
             # Adding the 'body' key and contents for delivery back to requestor
             retVal['body'] = json.dumps(
-                {'message': 'Email already exists', 'success': False, 'club': {}})
+                {'message': 'Club already exists', 'success': False, 'club': {}})
             return retVal
         else:
             print("Unhandled Error")
             print(e)
     else:
-        print(inEmail + " Created")
+        print(inClubName + " Created")
         # Adding the 'body' key and contents for delivery back to requestor
         retVal['body'] = json.dumps(
             {'message': 'Club Added', 'success': True, 'club': club})
@@ -79,7 +72,7 @@ def get_club(event, context):
 
         Inputs: 
             Query String (from API Gateway)
-            - email: string (REQUIRED)
+            - clubName: string (REQUIRED)
         Outputs:
             JSON formated string containing
             - message: function outcome
@@ -93,16 +86,16 @@ def get_club(event, context):
         qsParams = event["queryStringParameters"]
 
         # Validate that we recieved a key 'email' in the query string
-        if 'email' in qsParams:
-            inEmail = qsParams['email']
+        if 'clubName' in qsParams:
+            inClubName = qsParams['clubName']
 
             # Attempt to get a response from dynamodb
             try:
-                print('Trying to find ' + inEmail)
+                print('Trying to find ' + inClubName)
                 response = dynamodb.get_item(
                     TableName=table,
                     Key={
-                        'email': {'S': str(qsParams['email'])}
+                        'clubName': {'S': str(qsParams['clubName'])}
                     }
                 )
             except Exception as e:
@@ -112,7 +105,7 @@ def get_club(event, context):
                     {'message': 'No Club Found', 'success': False, 'club': {}})
                 return retVal
             else:
-                print(inEmail + " Returned")
+                print(inClubName + " Returned")
                 club = response['Item']
 
                 retVal['body'] = json.dumps(
@@ -125,7 +118,6 @@ def update_club(event, context):
 
         Inputs: 
             JSON formated Response Header (from API Gateway)
-            - email: string (REQUIRED)
             - clubName: string
             - nickName: string
         Outputs:
@@ -142,25 +134,26 @@ def update_club(event, context):
     payLoad = json.loads(payLoad)  # Encode string into json (read: dict)
 
     # Need to valdiate that we got an email in the payload
-    if 'email' in payLoad:
+    if 'clubName' in payLoad:
         # We first want to verify that the club exists in our table
         try:
-            print('Looking for ' + payLoad['email'])
+            print('Looking for ' + payLoad['clubName'])
             response = dynamodb.get_item(
                 TableName=table,
                 Key={
-                    'email': {'S': str(payLoad['email'])}
+                    'clubName': {'S': str(payLoad['clubName'])}
                 }
             )
         except Exception as e:
             # TODO: Build specific handling for club not found vs generic something went wrong
-            print(payLoad['email'] + ' not found')
+            print(payLoad['clubName'] + ' not found')
             print(e)
+            retVal['statusCode'] = 500
             retVal['body'] = json.dumps(
-                {'message': 'Club Not Found', 'success': False, 'club': {}})
+                {'message': str(e), 'success': False, 'club': {}})
             return retVal
         else:
-            print(payLoad['email'] + ' was found')
+            print(payLoad['clubName'] + ' was found')
             # taking the existing club object in from the initial search
             club = response['Item']
 
@@ -173,21 +166,22 @@ def update_club(event, context):
 
             # Need to try updating the club record we found
             try:
-                print('Trying to update ' + payLoad['email'])
+                print('Trying to update ' + payLoad['clubName'])
                 dynamodb.put_item(TableName=table, Item=club)
             except Exception as e:
-                print(payLoad['email'] + ' failed to update')
+                print(payLoad['clubName'] + ' failed to update')
                 print(e)
+                retVal['statusCode'] = 500
                 retVal['body'] = json.dumps(
-                    {'message': 'Club Not Found', 'success': False, 'club': {}})
+                    {'message': str(e), 'success': False, 'club': {}})
                 return retVal
             else:
-                print(payLoad['email'] + " Updated")
+                print(payLoad['clubName'] + " Updated")
                 retVal['body'] = json.dumps(
                     {'message': 'Club Updated', 'success': True, 'club': club})
                 return retVal
     # We never got an email in the payload so we cant update anything
     else:
         retVal['body'] = json.dumps(
-            {'message': 'No Email Recieved', 'success': False, 'club': {}})
+            {'message': 'No Club Name Recieved', 'success': False, 'club': {}})
         return retVal
