@@ -42,5 +42,5 @@ def get_clubs(event, context):
         clubs = response['Items']
 
         retVal['body'] = json.dumps(
-            {'message': 'Clubs Returned Successfully', 'success': True, 'clubs': clubs})
+            {'message': 'Clubs Returned', 'success': True, 'clubs': clubs})
         return retVal
