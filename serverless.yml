@@ -132,5 +132,21 @@ functions:
     events:
       - http:
           path: game
+          method: post
+          cors: true
+
+  end-game:
+    handler: game.end_game
+    events:
+      - http:
+          path: game
           method: put
+          cors: true
+
+  get-games:
+    handler: games.get_games
+    events:
+      - http:
+          path: games
+          method: get
           cors: true
