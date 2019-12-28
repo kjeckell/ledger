@@ -51,13 +51,13 @@ def add_player(event, context):
     # Attempt to add the player to dynamodb
     try:
         print('Trying to add: ' + inEmail)
-        response = dynamodb.put_item(
+        dynamodb.put_item(
             TableName=table,
             Item=player,
             ConditionExpression="attribute_not_exists(email)"
         )
     except Exception as e:
-        if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
+        if e == 'ConditionalCheckFailedException':
             print(inEmail + ' already exists in table ' + table)
             # Adding the 'body' key and contents for delivery back to requestor
             retVal['body'] = json.dumps(

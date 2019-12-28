@@ -44,13 +44,13 @@ def add_club(event, context):
     # Attempt to add the club to dynamodb
     try:
         print('Trying to add: ' + inClubName)
-        response = dynamodb.put_item(
+        dynamodb.put_item(
             TableName=table,
             Item=club,
             ConditionExpression="attribute_not_exists(clubName)"
         )
     except Exception as e:
-        if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
+        if e == 'ConditionalCheckFailedException':
             print(inClubName + ' already exists in table ' + table)
             # Adding the 'body' key and contents for delivery back to requestor
             retVal['body'] = json.dumps(

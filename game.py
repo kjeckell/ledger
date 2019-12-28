@@ -62,13 +62,13 @@ def start_game(event, context):
     game['gameUniqueKey'] = {'S': gameUniqueKey}
     try:
         print('Trying to add: ' + gameUniqueKey)
-        response = dynamodb.put_item(
+        dynamodb.put_item(
             TableName=table,
             Item=game,
             ConditionExpression="attribute_not_exists(gameUniqueKey)"
         )
     except Exception as e:
-        if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
+        if e == 'ConditionalCheckFailedException':
             print('This club already has a game on that day in ' + table)
             # Adding the 'body' key and contents for delivery back to requestor
             retVal['body'] = json.dumps(
