@@ -10,10 +10,11 @@ import os
 retVal = {"isBase64Encoded": False, "statusCode": 200, "headers": {
     "Access-Control-Allow-Origin": '*', "Access-Control-Allow-Credentials": True}}
 table = os.environ['ClubTableName']
+playerTable = os.environ['PlayerTableName']
 
 
 def add_club(event, context):
-    '''add_club is a Lambda Function used to insert a club record
+    '''add_club is a Lambda Function used to insert a club record and create a bank@clubName player for transactions
 
         Inputs: 
             JSON formated Response Header (from API Gateway)
@@ -61,7 +62,27 @@ def add_club(event, context):
             print(e)
     else:
         print(inClubName + " Created")
-        # Adding the 'body' key and contents for delivery back to requestor
+        print('Creating BANK Player for ' + inClubName)
+
+        clubBank = {
+            "email": {"S": "Bank@" + inClubName},
+            "fullName": {"S": inClubName + " Bank"},
+            "nickName": {"S": "Bank"}
+        }
+
+        try:
+            dynamodb.put_item(
+                TableName=playerTable,
+                Item=clubBank,
+                ConditionExpression="attribute_not_exists(email)"
+            )
+        except Exception as e: # This does NOT halt the creation of the club
+            if e == 'ConditionalCheckFailedException':
+                print('Bank for ' + inClubName + ' already exists')
+            else:
+                print("Unhandled Error")
+                print(e)
+
         retVal['body'] = json.dumps(
             {'message': 'Club Added', 'success': True, 'club': club})
         return retVal

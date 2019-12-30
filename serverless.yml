@@ -10,6 +10,7 @@ custom:
   PlayerTableName: ${self:custom.stage}-player
   ClubTableName: ${self:custom.stage}-club
   GamesTableName: ${self:custom.stage}-games
+  GameLedgerTableName: ${self:custom.stage}-gameLedger
 
   # Set our DynamoDB throughput for prod and all other non-prod stages.
   tableThroughputs:
@@ -42,6 +43,7 @@ provider:
         - "Fn::GetAtt": [ PlayerTable, Arn ] # pulled from dynamodb include file
         - "Fn::GetAtt": [ ClubTable, Arn ] # pulled from dynamodb include file
         - "Fn::GetAtt": [ GamesTable, Arn ]
+        - "Fn::GetAtt": [ GameLedgerTable, Arn ]
 
 # you can define service wide environment variables here
 # to use them we must import os and call with os.environ['VARNAME']
@@ -49,6 +51,7 @@ provider:
     PlayerTableName: ${self:custom.PlayerTableName} # pulling from custom section
     ClubTableName: ${self:custom.ClubTableName}
     GamesTableName: ${self:custom.GamesTableName}
+    GameLedgerTableName: ${self:custom.GameLedgerTableName}
 
 # you can add packaging information here
 # treating this as gitignore for package
@@ -149,4 +152,12 @@ functions:
       - http:
           path: games
           method: get
+          cors: true
+
+  add-ledger:
+    handler: gamesLedger.add_ledger_entry
+    events:
+      - http:
+          path: gamesledger
+          method: post
           cors: true

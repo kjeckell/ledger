@@ -43,3 +43,22 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: ${self:custom.tableThroughput}
         WriteCapacityUnits: ${self:custom.tableThroughput}
+
+  GameLedgerTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:custom.GameLedgerTableName}
+      AttributeDefinitions:
+        - AttributeName: gameUniqueKey
+          AttributeType: S
+        - AttributeName: ledgerUUID
+          AttributeType: S
+      KeySchema:
+        - AttributeName: gameUniqueKey
+          KeyType: HASH
+        - AttributeName: ledgerUUID
+          KeyType: RANGE
+      # Set the capacity based on the stage
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:custom.tableThroughput}
+        WriteCapacityUnits: ${self:custom.tableThroughput}

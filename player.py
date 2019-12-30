@@ -47,6 +47,13 @@ def add_player(event, context):
 
     if 'nickName' in payLoad:
         player['nickName'] = {'S': payLoad['nickName']}
+    
+    # Do not allow users to submit emails starting with Bank@ to avoid issues with clubs
+    if inEmail[0:5] == "Bank@":
+        retVal['statusCode'] = 500
+        retVal['body'] = json.dumps(
+                {'message': 'Email addresses beginning with Bank@ are not allowed', 'success': False, 'player': {}})
+        return retVal
 
     # Attempt to add the player to dynamodb
     try:
